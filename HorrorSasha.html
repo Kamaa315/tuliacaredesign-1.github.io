@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DO NOT OPEN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Creepster&family=UnifrakturMaguntia&display=swap');
+        
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Special Elite', monospace;
+            overflow: hidden;
+            cursor: none;
+        }
+        
+        .cursor-follower {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s;
+            mix-blend-mode: difference;
+        }
+        
+        .cursor-trail {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 0, 0, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+        }
+        
+        /* Static noise overlay */
+        .static {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9000;
+            opacity: 0.08;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            animation: staticMove 0.5s steps(4) infinite;
+        }
+        
+        @keyframes staticMove {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-5px, 5px); }
+            50% { transform: translate(5px, -5px); }
+            75% { transform: translate(-5px, -5px); }
+            100% { transform: translate(0, 0); }
+        }
+        
+        /* Vignette */
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+            z-index: 8000;
+        }
+        
+        /* Flicker effect */
+        .flicker {
+            animation: flicker 4s infinite;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            5% { opacity: 0.8; }
+            10% { opacity: 1; }
+            15% { opacity: 0.3; }
+            20% { opacity: 1; }
+            50% { opacity: 1; }
+            52% { opacity: 0.1; }
+            54% { opacity: 1; }
+            90% { opacity: 1; }
+            95% { opacity: 0.5; }
+        }
+        
+        /* Text glitch */
+        .glitch-text {
+            position: relative;
+            animation: textGlitch 3s infinite;
+        }
+        
+        @keyframes textGlitch {
+            0%, 100% { transform: translate(0); filter: none; }
+            20% { transform: translate(-2px, 2px); filter: hue-rotate(90deg); }
+            40% { transform: translate(2px, -2px); filter: hue-rotate(-90deg); }
+            60% { transform: translate(-2px, -2px); filter: saturate(2); }
+            80% { transform: translate(2px, 2px); filter: invert(0.2); }
+        }
+        
+        /* Horror font */
+        .horror-font {
+            font-family: 'Creepster', cursive;
+        }
+        
+        .gothic-font {
+            font-family: 'UnifrakturMaguntia', cursive;
+        }
+        
+        /* Flash overlay */
+        .flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10000;
+            transition: opacity 0.05s;
+        }
+        
+        .flash.active {
+            opacity: 1;
+        }
+        
+        /* Jump scare container */
+        .jumpscare {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            background: black;
+        }
+        
+        .jumpscare.active {
+            display: flex;
+            animation: jumpscareShake 0.5s ease;
+        }
+        
+        @keyframes jumpscareShake {
+            0%, 100% { transform: scale(1); }
+            10% { transform: scale(1.3) rotate(-5deg); }
+            20% { transform: scale(1.2) rotate(5deg); }
+            30% { transform: scale(1.3) rotate(-3deg); }
+            40% { transform: scale(1.2) rotate(3deg); }
+            50% { transform: scale(1.3); }
+        }
+        
+        /* Distorted image */
+        .distort {
+            filter: contrast(2) brightness(0.8) saturate(0);
+            transition: all 0.3s;
+        }
+        
+        .distort:hover {
+            filter: contrast(3) brightness(1.2) saturate(2) hue-rotate(180deg);
+        }
+        
+        /* Blood drip */
+        .blood {
+            position: fixed;
+            top: -100px;
+            width: 2px;
+            background: linear-gradient(to bottom, transparent, #8b0000, #ff0000);
+            opacity: 0.6;
+            pointer-events: none;
+            z-index: 7000;
+        }
+        
+        @keyframes bloodDrip {
+            0% { top: -100px; height: 0; }
+            10% { height: 100px; }
+            90% { top: 100vh; height: 50px; }
+            100% { top: 100vh; height: 0; }
+        }
+        
+        /* Whisper text */
+        .whisper {
+            font-size: 0.8rem;
+            opacity: 0.3;
+            font-style: italic;
+        }
+        
+        /* Inverted colors section */
+        .inverted {
+            filter: invert(1) hue-rotate(180deg);
+            background: white;
+        }
+        
+        /* Strobe warning */
+        .strobe {
+            animation: strobe 0.1s infinite;
+        }
+        
+        @keyframes strobe {
+            0%, 100% { background: black; }
+            50% { background: red; }
+        }
+        
+        /* Hidden face */
+        .hidden-face {
+            position: fixed;
+            opacity: 0;
+            transition: opacity 0.1s;
+            pointer-events: none;
+            z-index: 9995;
+        }
+        
+        .hidden-face.show {
+            opacity: 0.3;
+        }
+        
+        /* Typewriter with errors */
+        .type-container {
+            position: relative;
+        }
+        
+        .type-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background: red;
+            animation: blink 0.5s infinite;
+            vertical-align: middle;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        /* Scramble effect */
+        .scramble {
+            display: inline-block;
+        }
+        
+        /* Door creak sound visualization */
+        .creak-bar {
+            width: 0;
+            height: 2px;
+            background: #ff0000;
+            transition: width 2s ease;
+        }
+        
+        .creak-bar.active {
+            width: 100%;
+        }
+        
+        /* Mirror text */
+        .mirror {
+            transform: scaleX(-1);
+        }
+        
+        /* Upside down */
+        .flip {
+            transform: rotate(180deg);
+        }
+        
+        /* Breathing animation */
+        .breathe {
+            animation: breathe 4s ease-in-out infinite;
+        }
+        
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        /* Shadow people */
+        .shadow-person {
+            position: fixed;
+            bottom: -100px;
+            width: 60px;
+            height: 200px;
+            background: linear-gradient(to top, black 0%, transparent 100%);
+            opacity: 0;
+            transition: all 2s;
+            pointer-events: none;
+            z-index: 6000;
+        }
+        
+        .shadow-person.show {
+            bottom: 0;
+            opacity: 0.6;
+        }
+        
+        /* TV static transition */
+        .tv-off {
+            animation: tvOff 0.3s ease forwards;
+        }
+        
+        @keyframes tvOff {
+            0% { transform: scale(1, 1); filter: brightness(1); }
+            50% { transform: scale(1, 0.01); filter: brightness(10); }
+            100% { transform: scale(0, 0); filter: brightness(0); }
+        }
+        
+        /* Crawling text */
+        .crawl {
+            animation: crawl 10s linear infinite;
+        }
+        
+        @keyframes crawl {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100vw); }
+        }
+        
+        /* Face in text */
+        .face-in-text {
+            position: relative;
+        }
+        
+        .face-in-text::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='35' cy='40' r='5' fill='white'/%3E%3Ccircle cx='65' cy='40' r='5' fill='white'/%3E%3Cpath d='M 30 60 Q 50 50 70 60' stroke='white' fill='none' stroke-width='2'/%3E%3C/svg%3E") center/contain no-repeat;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .face-in-text:hover::after {
+            opacity: 0.5;
+        }
+        
+        /* Error message style */
+        .error-msg {
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+        }
+        
+        /* Loading that never ends */
+        .endless-loading {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .endless-loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 30%;
+            background: #ff0000;
+            animation: endless 2s ease-in-out infinite;
+        }
+        
+        @keyframes endless {
+            0% { left: -30%; }
+            100% { left: 100%; }
+        }
+        
+        /* Fake system error */
+        .system-error {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #0000aa;
+            color: white;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            z-index: 10002;
+            display: none;
+            border: 2px solid white;
+            box-shadow: 0 0 20px #0000aa;
+        }
+        
+        .system-error.show {
+            display: block;
+            animation: errorShake 0.1s infinite;
+        }
+        
+        @keyframes errorShake {
+            0%, 100% { transform: translate(-50%, -50%) translate(0, 0); }
+            25% { transform: translate(-50%, -50%) translate(-2px, 2px); }
+            75% { transform: translate(-50%, -50%) translate(2px, -2px); }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body class="bg-black text-white overflow-hidden">
+
+    <!-- Custom cursor -->
+    <div class="cursor-follower" id="cursor"></div>
+
+    <!-- Effects layers -->
+    <div class="static"></div>
+    <div class="vignette"></div>
+    <div class="flash" id="flash"></div>
+
+    <!-- Hidden faces that appear briefly -->
+    <div class="hidden-face" id="face1" style="top: 20%; left: 10%;">
+        <svg width="200" height="200" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="2"/>
+            <circle cx="35" cy="40" r="8" fill="white"/>
+            <circle cx="65" cy="40" r="8" fill="white"/>
+            <path d="M 30 65 Q 50 45 70 65" stroke="white" fill="none" stroke-width="3"/>
+        </svg>
+    </div>
+    <div class="hidden-face" id="face2" style="top: 60%; right: 10%; transform: rotate(15deg);">
+        <svg width="150" height="150" viewBox="0 0 100 100">
+            <ellipse cx="50" cy="50" rx="40" ry="50" fill="none" stroke="white" stroke-width="2"/>
+            <circle cx="30" cy="35" r="10" fill="white"/>
+            <circle cx="70" cy="35" r="6" fill="white"/>
+            <rect x="35" y="60" width="30" height="10" fill="white"/>
+        </svg>
+    </div>
+
+    <!-- Shadow people -->
+    <div class="shadow-person" id="shadow1" style="left: 10%;"></div>
+    <div class="shadow-person" id="shadow2" style="left: 30%; height: 250px;"></div>
+    <div class="shadow-person" id="shadow3" style="right: 20%; height: 180px;"></div>
+
+    <!-- Jump scare overlay -->
+    <div class="jumpscare" id="jumpscare">
+        <div class="text-center">
+            <div class="horror-font text-9xl mb-4" style="color: #ff0000; text-shadow: 0 0 50px #ff0000;">SASHA</div>
+            <div class="text-2xl mono tracking-widest animate-pulse">I SEE YOU</div>
+        </div>
+    </div>
+
+    <!-- Fake system error -->
+    <div class="system-error" id="system-error">
+        <div class="text-xl mb-4">FATAL ERROR: 0x0000007B</div>
+        <div class="mb-4">A problem has been detected and Windows has been shut down to prevent damage to your computer.</div>
+        <div class="mb-4">PROCESS_NAME: SASHA.EXE</div>
+        <div class="mb-4">MEMORY_COULD_NOT_BE_READ</div>
+        <div>Technical information:</div>
+        <div class="mono mt-2">*** STOP: 0x0000007B (0xFFFFF880009A9928, 0xFFFFFFFFC0000034, 0x0000000000000000, 0x0000000000000000)</div>
+        <div class="mt-4 text-center animate-pulse">Collecting data for crash dump...</div>
+        <div class="mt-2 text-center">Initializing disk for crash dump...</div>
+    </div>
+
+    <!-- Entrance Screen -->
+    <div id="entrance" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
+        <div class="text-center max-w-md px-4">
+            <div class="mb-8 text-red-600 text-6xl horror-font flicker">WARNING</div>
+            
+            <div class="space-y-4 text-gray-400 text-sm mb-8 type-container">
+                <p>This website contains:</p>
+                <ul class="space-y-2 text-left inline-block">
+                    <li class="whisper">• Sudden loud noises</li>
+                    <li class="whisper">• Flashing images</li>
+                    <li class="whisper">• Psychological manipulation</li>
+                    <li class="whisper">• References to Sasha</li>
+                </ul>
+            </div>
+
+            <div class="creak-bar mb-8" id="creak-bar"></div>
+
+            <div class="space-y-4">
+                <button onclick="enterHorror()" class="block w-full py-3 border border-red-900 text-red-600 hover:bg-red-900 hover:text-black transition-all mono tracking-widest text-sm">
+                    [ ENTER ANYWAY ]
+                </button>
+                <button onclick="fakeExit()" class="block w-full py-3 border border-gray-800 text-gray-600 hover:border-red-900 hover:text-red-600 transition-all mono tracking-widest text-sm">
+                    [ LEAVE ]
+                </button>
+            </div>
+
+            <div class="mt-8 text-xs text-gray-700 whisper">
+                You don't have a choice, Sasha.
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Horror Content -->
+    <main id="main-horror" class="hidden relative z-10">
+        
+        <!-- Header -->
+        <header class="fixed top-0 w-full p-4 flex justify-between items-center z-40 mix-blend-difference">
+            <div class="mono text-xs text-red-600 tracking-[0.5em] animate-pulse">
+                SUBJECT: SASHA
+            </div>
+            <div class="mono text-xs text-gray-600" id="clock">
+                --:--:--
+            </div>
+        </header>
+
+        <!-- Section 1: The Introduction -->
+        <section class="min-h-screen flex items-center justify-center relative px-4" id="section1">
+            <div class="max-w-2xl text-center">
+                <div class="mb-4 text-red-600 text-xs mono tracking-widest">FILE CORRUPTED // RECOVERING...</div>
+                
+                <h1 class="text-6xl md:text-8xl horror-font mb-6 glitch-text" style="color: #ff0000; text-shadow: 0 0 20px #ff0000;">
+                    SASHA
+                </h1>
+                
+                <div class="text-gray-400 text-lg mb-8 breathe face-in-text" id="intro-text">
+                    We need to talk about what you did.
+                </div>
+
+                <div class="flex justify-center space-x-8 text-xs mono text-gray-600">
+                    <span>DATE: <span class="text-red-400">UNKNOWN</span></span>
+                    <span>TIME: <span class="text-red-400">WRONG</span></span>
+                    <span>LOCATION: <span class="text-red-400">BEHIND YOU</span></span>
+                </div>
+
+                <div class="mt-16">
+                    <button onclick="nextSection(2)" class="text-gray-500 hover:text-red-500 transition-all text-sm mono tracking-widest">
+                        [ SCROLL TO CONTINUE ]
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Accusation -->
+        <section class="min-h-screen flex items-center justify-center relative px-4 hidden" id="section2">
+            <div class="max-w-3xl">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <div class="text-red-600 text-xs mono mb-4 tracking-widest">EVIDENCE #001</div>
+                        <h2 class="text-4xl horror-font mb-6">THE PEN</h2>
+                        
+                        <div class="space-y-4 text-gray-400 text-sm leading-relaxed">
+                            <p>You borrowed it on <span class="text-red-400">January 15th</span>.</p>
+                            <p>You said you'd return it <span class="text-red-400">tomorrow</span>.</p>
+                            <p>Tomorrow never came.</p>
+                            <p class="text-red-600 whisper">I know you still have it.</p>
+                        </div>
+
+                        <div class="mt-8 p-4 border border-red-900/30 bg-red-900/10">
+                            <div class="mono text-xs text-red-400 mb-2">ITEM STATUS:</div>
+                            <div class="endless-loading h-2 bg-gray-800 rounded"></div>
+                            <div class="mt-2 text-xs text-gray-600">Searching... 847 days elapsed</div>
+                        </div>
+                    </div>
+                    
+                    <div class="relative">
+                        <div class="distort aspect-square bg-gradient-to-br from-gray-900 to-black border border-red-900/20 flex items-center justify-center">
+                            <i class="fas fa-pen-fancy text-6xl text-red-600/20"></i>
+                        </div>
+                        <div class="absolute -bottom-4 -right-4 text-6xl horror-font text-red-600/10">?</div>
+                    </div>
+                </div>
+
+                <div class="mt-16 text-center">
+                    <button onclick="triggerJumpScare(); setTimeout(() => nextSection(3), 1000)" class="text-red-600 hover:text-white transition-all text-sm mono tracking-widest border border-red-900 px-6 py-2">
+                        [ CONFESS ]
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: The Observation -->
+        <section class="min-h-screen flex items-center justify-center relative px-4 hidden inverted" id="section3">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-12">
+                    <div class="text-black text-xs mono mb-4 tracking-widest">I'VE BEEN WATCHING</div>
+                    <h2 class="text-5xl horror-font mb-4 text-black">47 TIMES</h2>
+                    <p class="text-gray-800">That's how many times you rolled your eyes in one lecture.</p>
+                </div>
+
+                <div class="grid grid-cols-4 md:grid-cols-8 gap-4 mb-12">
+                    <!-- Eye indicators -->
+                    ${Array(47).fill(0).map((_, i) => `
+                        <div class="aspect-square bg-black/10 flex items-center justify-center text-xs mono text-gray-600 hover:bg-red-600 hover:text-white transition-all cursor-pointer" 
+                             onmouseover="this.textContent='${i + 1}'; flashScreen()"
+                             onmouseout="this.textContent='◉'">
+                            ◉
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="text-center">
+                    <p class="text-gray-800 text-sm mb-4 whisper">Each one cut deeper than the last.</p>
+                    <button onclick="nextSection(4)" class="text-black hover:text-red-600 transition-all text-sm mono tracking-widest border border-black px-6 py-2">
+                        [ I UNDERSTAND ]
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: The Messages -->
+        <section class="min-h-screen flex items-center justify-center relative px-4 hidden" id="section4">
+            <div class="max-w-2xl w-full">
+                <div class="text-red-600 text-xs mono mb-8 tracking-widest text-center">TRANSMISSIONS INTERCEPTED</div>
+                
+                <div class="space-y-4" id="messages-container">
+                    <!-- Messages appear here -->
+                </div>
+
+                <div class="mt-8 text-center">
+                    <button onclick="decodeNextMessage()" id="decode-btn" class="text-red-600 hover:text-white transition-all text-sm mono tracking-widest border border-red-900 px-6 py-2">
+                        [ DECRYPT NEXT ]
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: The Confrontation -->
+        <section class="min-h-screen flex items-center justify-center relative px-4 hidden bg-red-900/10" id="section5">
+            <div class="text-center max-w-2xl">
+                <div class="horror-font text-8xl mb-8 glitch-text" style="color: #ff0000;">WHY</div>
+                
+                <div class="space-y-6 text-gray-300">
+                    <p class="text-xl">Why do you tolerate me?</p>
+                    <p class="text-sm text-gray-500">I've taken your pens, your chargers, your patience.</p>
+                    <p class="text-sm text-gray-500">I've made websites about you without asking.</p>
+                    <p class="text-lg text-red-400 mt-8">And yet you're still here.</p>
+                </div>
+
+                <div class="mt-12 grid grid-cols-2 gap-4 max-w-md mx-auto">
+                    <button onclick="showKindEnding()" class="py-4 border border-emerald-900 text-emerald-600 hover:bg-emerald-900 hover:text-black transition-all mono text-sm">
+                        [ BECAUSE WE'RE FRIENDS ]
+                    </button>
+                    <button onclick="showDarkEnding()" class="py-4 border border-red-900 text-red-600 hover:bg-red-900 hover:text-black transition-all mono text-sm">
+                        [ I HAVE NO CHOICE ]
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ending: Kind -->
+        <section class="min-h-screen flex items-center justify-center relative px-4 hidden" id="kind-ending">
+            <div class="text-center max-w-2xl">
+                <div class="text-6xl mb-6">🖤</div>
+                <h2 class="text-3xl horror-font mb-6 text-emerald-400">FRIENDSHIP CONFIRMED</h2>
+                <p class="text-gray-400 mb-8">The pen is forgiven. The website is forgotten. The friendship remains.</p>
+                <div class="text-sm text-gray-600 mono">END OF TRANSMISSION</div>
+            </div>
+        </section>
+
+        <!-- Ending: Dark -->
+        <section class="min-h-screen flex items-center justify-center relative px-4 hidden bg-black" id="dark-ending">
+            <div class="text-center">
+                <div class="horror-font text-9xl mb-4" style="color: #ff0000; text-shadow: 0 0 100px #ff0000;">TRAPPED</div>
+                <p class="text-gray-500 mb-8">There is no escape from this friendship.</p>
+                <div class="text-xs text-gray-700 mono animate-pulse">REFRESH TO TRY AGAIN (IT WON'T WORK)</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Audio elements (silent placeholders for structure) -->
+    <div id="audio-container" style="display: none;"></div>
+
+    <script>
+        // Custom cursor
+        const cursor = document.getElementById('cursor');
+        const trails = [];
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX - 10 + 'px';
+            cursor.style.top = e.clientY - 10 + 'px';
+            
+            // Create trail
+            if (Math.random() > 0.7) {
+                const trail = document.createElement('div');
+                trail.className = 'cursor-trail';
+                trail.style.left = e.clientX + 'px';
+                trail.style.top = e.clientY + 'px';
+                document.body.appendChild(trail);
+                
+                setTimeout(() => {
+                    trail.style.opacity = '0';
+                    setTimeout(() => trail.remove(), 300);
+                }, 100);
+            }
+        });
+
+        // Random horror effects
+        setInterval(() => {
+            if (Math.random() > 0.95 && document.getElementById('main-horror').classList.contains('hidden') === false) {
+                // Flash hidden face
+                const faces = ['face1', 'face2'];
+                const face = document.getElementById(faces[Math.floor(Math.random() * faces.length)]);
+                face.classList.add('show');
+                setTimeout(() => face.classList.remove('show'), 150);
+            }
+            
+            if (Math.random() > 0.98) {
+                // Show shadow person
+                const shadows = ['shadow1', 'shadow2', 'shadow3'];
+                const shadow = document.getElementById(shadows[Math.floor(Math.random() * shadows.length)]);
+                shadow.classList.add('show');
+                setTimeout(() => shadow.classList.remove('show'), 3000);
+            }
+        }, 2000);
+
+        // Blood drips
+        function createBlood() {
+            const blood = document.createElement('div');
+            blood.className = 'blood';
+            blood.style.left = Math.random() * 100 + 'vw';
+            blood.style.animation = `bloodDrip ${3 + Math.random() * 4}s linear forwards`;
+            document.body.appendChild(blood);
+            setTimeout(() => blood.remove(), 7000);
+        }
+        setInterval(createBlood, 8000);
+
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            const wrong = new Date(now.getTime() - Math.random() * 10000000);
+            document.getElementById('clock').textContent = wrong.toLocaleTimeString('en-US', { 
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        setInterval(updateClock, 1000);
+
+        // Entrance
+        setTimeout(() => {
+            document.getElementById('creak-bar').classList.add('active');
+        }, 500);
+
+        function enterHorror() {
+            document.getElementById('entrance').classList.add('tv-off');
+            setTimeout(() => {
+                document.getElementById('entrance').style.display = 'none';
+                document.getElementById('main-horror').classList.remove('hidden');
+                flashScreen();
+                startIntroTypewriter();
+            }, 300);
+        }
+
+        function fakeExit() {
+            // Fake exit that just makes it worse
+            document.getElementById('system-error').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('system-error').classList.remove('show');
+                document.querySelector('#entrance .whisper').textContent = "Nice try. There's no leaving.";
+                document.querySelector('#entrance .whisper').style.color = '#ff0000';
+                document.querySelector('#entrance .whisper').style.fontSize = '1rem';
+            }, 3000);
+        }
+
+        function flashScreen() {
+            const flash = document.getElementById('flash');
+            flash.classList.add('active');
+            setTimeout(() => flash.classList.remove('active'), 50);
+        }
+
+        function triggerJumpScare() {
+            const js = document.getElementById('jumpscare');
+            js.classList.add('active');
+            flashScreen();
+            flashScreen();
+            
+            // Vibrate if supported
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200, 100, 500]);
+            }
+            
+            setTimeout(() => {
+                js.classList.remove('active');
+            }, 800);
+        }
+
+        // Typewriter for intro
+        function startIntroTypewriter() {
+            const text = "We need to talk about what you did.";
+            const el = document.getElementById('intro-text');
+            el.textContent = '';
+            
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    el.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, 100 + Math.random() * 100);
+                }
+            }
+            type();
+        }
+
+        // Section navigation
+        function nextSection(n) {
+            // Hide all sections
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById('section' + i).classList.add('hidden');
+            }
+            
+            // Show target with effect
+            const target = document.getElementById('section' + n);
+            target.classList.remove('hidden');
+            
+            if (n === 3) {
+                // Inverted section
+                document.body.style.filter = 'invert(1)';
+                setTimeout(() => {
+                    document.body.style.filter = 'none';
+                }, 100);
+            }
+            
+            // Random glitch
+            if (Math.random() > 0.5) {
+                flashScreen();
+            }
+        }
+
+        // Messages decryption
+        const messages = [
+            "I know when you arrive.",
+            "I know where you sit.",
+            "I know you pretend not to see me.",
+            "I know you laugh at my jokes.",
+            "I know you're reading this right now.",
+            "I know you're not actually scared.",
+            "I know we're friends.",
+            "And that's the scariest part."
+        ];
+        
+        let messageIndex = 0;
+        function decodeNextMessage() {
+            if (messageIndex >= messages.length) {
+                document.getElementById('decode-btn').textContent = '[ NO MORE SECRETS ]';
+                document.getElementById('decode-btn').disabled = true;
+                
+                setTimeout(() => nextSection(5), 1000);
+                return;
+            }
+            
+            const container = document.getElementById('messages-container');
+            const msg = document.createElement('div');
+            msg.className = 'p-4 border-l-2 border-red-900 bg-red-900/5 text-gray-400 text-sm mono fade-in';
+            
+            // Scramble effect
+            const target = messages[messageIndex];
+            msg.textContent = '█'.repeat(target.length);
+            container.appendChild(msg);
+            
+            let revealed = 0;
+            const interval = setInterval(() => {
+                if (revealed < target.length) {
+                    msg.textContent = target.substring(0, revealed + 1) + '█'.repeat(target.length - revealed - 1);
+                    revealed++;
+                } else {
+                    clearInterval(interval);
+                    msg.textContent = target;
+                    msg.classList.add('text-red-400');
+                }
+            }, 50);
+            
+            messageIndex++;
+            
+            if (messageIndex === 5) {
+                triggerJumpScare();
+            }
+        }
+
+        // Endings
+        function showKindEnding() {
+            document.getElementById('section5').classList.add('hidden');
+            document.getElementById('kind-ending').classList.remove('hidden');
+            throwConfetti();
+        }
+
+        function showDarkEnding() {
+            document.getElementById('section5').classList.add('hidden');
+            document.getElementById('dark-ending').classList.remove('hidden');
+            
+            // Lock them in
+            setInterval(() => {
+                flashScreen();
+            }, 3000);
+        }
+
+        // Confetti for kind ending
+        function throwConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = '10px';
+                confetti.style.height = '10px';
+                confetti.style.background = i % 2 === 0 ? '#10b981' : '#374151';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.zIndex = '9999';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                confetti.style.animation = `fall ${3 + Math.random() * 2}s linear forwards`;
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => confetti.remove(), 5000);
+            }
+        }
+
+        // Prevent right click
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            alert('There is no escape.');
+        });
+
+        // Before unload
+        window.addEventListener('beforeunload', (e) => {
+            e.preventDefault();
+            e.returnValue = 'Are you sure you want to leave?';
+        });
+
+        // Random title changes
+        const titles = ['DO NOT OPEN', 'SASHA', 'BEHIND YOU', 'I SEE YOU', 'STAY', 'DON\'T LOOK', 'TOO LATE'];
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                document.title = titles[Math.floor(Math.random() * titles.length)];
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
